@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>🚨외국인상담</title>
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#007BFF">
+<style>
+  :root{
+    --box-height: 70px;
+    --box-gap: 10px;
+    --box-radius: 12px;
+    --box-font: 14px;
+    --max-width: 480px;
+
+    --when-date-w: clamp(92px, 46vw, 120px);
+    --when-time-w: clamp(62px, 28vw, 88px);
+
+    --blue-bg: #E9F4FF;
+    --orange-bg: #FFF1E6;
+  }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: Arial, sans-serif;
+    margin: 12px;
+    max-width: var(--max-width);
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    min-height: 100vh;
+    padding-bottom: 100px; /* 고정 하단 두 줄과 겹치지 않게 충분히 확보 */
+  }
+  h1, h2 { text-align: center; margin: 0 0 10px 0; }
+
+  .hyfont{
+    font-family: 'HYHeadLineM','HY헤드라인M','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+
+  .hidden { display: none; }
+
+  .multi-lang { margin: 10px 0; }
+
+  /* 제목 줄 */
+  .title-text {
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 17px;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:0;
+  }
+  .title-text .title-line { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #report .title-text .title-line + .title-line::before { content:" / "; }
+  #report .title-text .lang-line { margin-right:0; }
+  #report .multi-lang[data-section="5"] .title-text > div{ flex:1 1 auto; min-width:0; }
+  .right-actions.who-toggles{ flex-wrap:nowrap; white-space:nowrap; }
+
+  .back-button {
+    background-color: #555; margin-top: 25px; width: 80%; max-width: 320px;
+    padding: 12px; font-size: 14px; border: none; border-radius: 12px;
+    color: white; cursor: pointer; user-select: none;
+  }
+  .back-button:hover { background-color: #333; }
+
+  textarea {
+    width: 100%; font-size: 14px; box-sizing: border-box; padding: 6px;
+    resize: vertical; min-height: 78px; font-family: Arial, sans-serif;
+  }
+  .other-consult { min-height: 80px; }
+  .other-consult::placeholder { color:#444; opacity:1; white-space:pre-line; }
+
+  .final-wrap{ position: relative; }
+  .final-summary{
+    min-height: 120px;
+    font-size: 14px;
+    color: #000;
+    padding-right: 96px;
+  }
+  #final .note{ margin-top: 6px; font-weight: 600; color: #000; }
+  #final .actions{ display: none; }
+  #reset-button.inside{
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    z-index: 1;
+  }
+
+  #final .title-text .title-line{
+    color:#007BFF;
+    font-weight: 800;
+  }
+
+  #report .multi-lang[data-section="7"] .other-consult{
+    font-size: 17px;
+    line-height: 1.45;
+  }
+  #final .final-summary{
+    font-size: 17px;
+    line-height: 1.5;
+  }
+
+  /* 안내 문구 자동 축소 */
+  #final .guideline{
+    margin-top: 4px;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    color: #006400;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  #final .extra-note{
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #006400;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  #final .note-row{
+    display:flex; align-items:center; gap:10px; margin-top:6px;
+    flex-wrap: nowrap;
+  }
+  #final .note-row .extra-note{ margin:0; flex:1 1 auto; min-width:0; }
+  #capture-button{ flex:0 0 auto; }
+
+  /* ✅ 하단 고정문구: 래퍼로 고정 */
+  .footer-fixed{
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 2147483647;
+    pointer-events: none; /* 클릭 통과 */
+  }
+  .footer-fixed > div{
+    width: 100%;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    text-align: center;
+    font-size: calc(12px + 2pt);
+    color: #666;
+    background-color: #fff;
+    box-sizing: border-box;
+    /* ⬇️ 하단 안전영역까지 꽉 차게 & 두 줄 사이 여백 없음 */
+    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  }
+  /* ⬇️ 두 줄 사이 공백 제거 */
+  .footer-fixed .brand-line{ margin-bottom: 0; }
+  .footer-fixed .copy-right{ margin-top: 0; }
+
+  .box-row {
+    display: grid;
+    gap: var(--box-gap);
+    margin-top: var(--box-gap);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .box-cell {
+    border: 2px solid #007BFF; border-radius: var(--box-radius);
+    height: var(--box-height);
+    display: flex; flex-direction: column; justify-content: center; gap: 4px;
+    padding: 8px 6px; box-sizing: border-box; background: var(--blue-bg);
+    user-select: text; overflow: hidden;
+    font-size: var(--box-font); line-height: 1.15;
+    word-break: keep-all; overflow-wrap: break-word; white-space: nowrap;
+    transition: background-color .12s ease, box-shadow .12s ease;
+  }
+  .box-cell.selected{ background: var(--orange-bg); box-shadow: inset 0 0 0 1px rgba(255,153,0,.25); }
+
+  .box-row.bump2 .box-cell { font-size: calc(var(--box-font) + 2px); }
+  .box-row.bump2 .box-cell .lang-line:first-child{
+    font-weight: 700;
+    border-bottom: 1px solid rgba(0,123,255,0.4);
+    padding-bottom: 4px; margin-bottom: 4px;
+  }
+
+  .lang-line { display:block; }
+
+  #when-cell .filter-line.when > *,
+  #where-cell .filter-line.where > * { min-width: 0; }
+
+  .filter-line.when {
+    display: grid;
+    grid-template-columns: minmax(0, var(--when-date-w)) minmax(0, var(--when-time-w));
+    column-gap: 6px;
+    justify-content: start;
+    align-items: center;
+    margin-top: 6px;
+  }
+  #when-date { width: var(--when-date-w); max-width: 100%; }
+  #when-time { width: var(--when-time-w); max-width: 100%; }
+
+  .filter-line.where {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 6px;
+    align-items: center;
+    margin-top: 6px;
+  }
+  #where-address { width: 100%; max-width: 100%; }
+  .filter-line input[type="date"],
+  .filter-line input[type="time"],
+  .filter-line input[type="text"]{
+    font-size: 13px; padding: 4px 6px; box-sizing: border-box;
+    border: 1px solid #c6dafc; border-radius: 8px; background: #fff;
+  }
+  .gmaps-link{
+    display: inline-block; padding: 6px 8px; text-decoration: none;
+    border: 1px solid #007BFF; border-radius: 8px; font-size: 12px;
+    background: #ffffff; color: #007BFF; user-select:none;
+    cursor: pointer; white-space: nowrap;
+  }
+  .gmaps-link:active { transform: translateY(1px); }
+  .gmaps-link.selected{ background: var(--orange-bg); box-shadow: inset 0 0 0 1px rgba(255,153,0,.25); border-color:#ff9900; }
+
+  #when-cell .lang-line:not(.ko),
+  #where-cell .lang-line:not(.ko){
+    font-family: Arial, 'Apple SD Gothic Neo', 'Noto Sans', 'Segoe UI', sans-serif !important;
+    font-size: inherit; font-weight: 400; font-style: normal; letter-spacing: normal;
+  }
+
+  #when-cell, #where-cell{ height: calc(var(--box-height) * 1.5) !important; }
+
+  /* 장소 선택 패널 */
+  #where-cell.with-panel{ height: auto !important; }
+  .right-actions{ display:flex; gap:6px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
+  .place-panel{
+    margin-top:6px; padding:6px;
+    display:flex; flex-direction:column; gap:6px;
+    background:#F7FBFF; border:1px solid #c6dafc; border-radius:8px;
+  }
+  .place-panel.hidden{ display:none; }
+  .place-option{
+    padding:8px 10px; border:1px solid #007BFF; border-radius:8px;
+    background:#fff; font-size:14px; user-select:none; cursor:pointer;
+    text-align:left;
+  }
+
+  /* 다국어 표시 토글 */
+  #report .lang-line { display:none; }
+  #report[data-langs~="ko"] .lang-line.ko { display:inline; }
+  #report[data-langs~="en"] .lang-line.en { display:inline; }
+  #report[data-langs~="zh"] .lang-line.zh { display:inline; }
+  #report[data-langs~="vi"] .lang-line.vi { display:inline; }
+  #report[data-langs~="uz"] .lang-line.uz { display:inline; }
+  #report[data-langs~="ne"] .lang-line.ne { display:inline; }
+  #report[data-langs~="th"] .lang-line.th { display:inline; }
+  #report[data-langs~="km"] .lang-line.km { display:inline; }
+  #report[data-langs~="fil"] .lang-line.fil { display:inline; }
+  #report[data-langs~="si"] .lang-line.si { display:inline; }
+  #report[data-langs~="id"] .lang-line.id { display:inline; }
+
+  #report .box-cell .lang-line { margin-right: 6px; }
+
+  /* 첫 화면 버튼 — 높이/폰트 축소 */
+  #lang-select .lang-title{
+    text-align:center;
+    margin: 0 0 8px 0;
+    font-size: clamp(14px, 4.6vw, 18px);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    width: 100%;
+  }
+/* 1) 목록 래퍼 – 간격·여백 약간 축소 */
+#lang-select .button-list{
+  display:flex; flex-direction:column; gap:6px;
+  width:100%; max-width:var(--max-width); margin:6px auto 0;
+  align-items:center;
+}
+
+/* 2) 모든 언어 버튼 공통 – 세로길이 통일, 가로 약간 축소, 폰트 +1 */
+#lang-select .button-list button{
+  width:92%;            /* 가로폭 살짝 줄임(기존 90~96% → 92%) */
+  max-width:440px;      /* 최대폭도 약간 줄임(460 → 440) */
+  height:44px;          /* ✅ 세로 높이 고정 → 모든 언어 버튼 동일 */
+  padding:0 12px;       /* 높이는 height로 통일, 좌우만 패딩 */
+  font-size:clamp(13px, 4.1vw, 16px); /* 대략 +1pt ↑ */
+  line-height:1.1;
+  border-radius:10px; border:none; background:#007BFF; color:#fff; cursor:pointer;
+  box-shadow:0 2px 4px rgba(0,0,0,0.08);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  display:flex; align-items:center; justify-content:center;
+}
+#lang-select .button-list button:hover{ background:#0056b3; }
+
+/* 3) 메뉴얼 버튼도 동일 높이 적용 */
+#lang-select .button-list button.manual-button{
+  height:44px; padding:0 12px;
+  border:1px solid #d8d8d8; background:#f3f3f3; color:#222;
+  box-shadow:0 2px 4px rgba(0,0,0,0.06);
+  font-size:clamp(13px, 3.9vw, 16px);
+  display:flex; align-items:center; justify-content:center;
+}
+#lang-select .button-list button.manual-button:hover{ background:#e7e7e7; }
+
+/* 4) 작은 화면 보정 */
+@media (max-width: 360px){
+  :root{ --when-date-w: 96px; --when-time-w: 68px; }
+  #lang-select .button-list button{
+    height:40px; padding:0 10px;
+    font-size:clamp(13px, 4.6vw, 15px);
+  }
+  #lang-select .button-list button.manual-button{
+    height:40px; padding:0 10px;
+    font-size:clamp(13px, 4.4vw, 15px);
+  }
+}
+
+  .instruction-banner{
+    text-align:center;
+    margin: 2px 0 10px 0;
+    color:#0b64d1;
+  }
+  .instruction-banner .line{
+    display:block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25;
+  }
+  #report .instruction-banner .lang-line{ display:none; }
+  #report[data-langs~="ko"] .instruction-banner .ko{ display:block; }
+  #report[data-langs~="en"] .instruction-banner .en{ display:block; }
+  #report[data-langs~="zh"] .instruction-banner .zh{ display:block; }
+  #report[data-langs~="vi"] .instruction-banner .vi{ display:block; }
+  #report[data-langs~="uz"] .instruction-banner .uz{ display:block; }
+  #report[data-langs~="ne"] .instruction-banner .ne{ display:block; }
+  #report[data-langs~="th"] .instruction-banner .th{ display:block; }
+  #report[data-langs~="km"] .instruction-banner .km{ display:block; }
+  #report[data-langs~="fil"] .instruction-banner .fil{ display:block; }
+  #report[data-langs~="si"] .instruction-banner .si{ display:block; }
+  #report[data-langs~="id"] .instruction-banner .id{ display:block; }
+
+  /* 메뉴얼 화면 */
+  #manual .section{
+    margin: 14px 0; padding: 12px; border:1px solid #e5e5e5; border-radius:10px; background:#fafafa;
+  }
+  #manual h2{ font-size: 18px; margin-bottom: 6px; }
+  #manual .section ol{
+    margin: 8px 0 0 0; padding: 0; counter-reset: item;
+  }
+  #manual .section ol > li{
+    list-style: none; margin: 6px 0; padding-left: 0; line-height: 1.4;
+  }
+  #manual .section ol > li::before{
+    counter-increment: item; content: counter(item) ") "; font-weight: 700;
+  }
+
+  .toast{
+    position: fixed; bottom: 56px; left: 50%; transform: translateX(-50%);
+    background: #006400; color: #fff; padding: 10px 14px; border-radius: 10px;
+    font-size: 14px; z-index: 2000; opacity: 0; transition: opacity .25s;
+    max-width: var(--max-width); text-align:center; pointer-events: none;
+  }
+  .toast.show{ opacity: 1; }
+
+  .tip{ margin-top:8px; padding:8px; border-left:0; background:#f4faff; font-size:14px; }
+
+  /* 전역 복사 금지 */
+  * { -webkit-user-select: none !important; -ms-user-select: none !important; user-select: none !important; -webkit-touch-callout: none !important; }
+  input, textarea { -webkit-user-select: text !important; user-select: text !important; }
+</style>
+</head>
+<body>
+<!-- 메인: 언어쌍 선택 (기본 화면) -->
+<div id="lang-select" class="screen">
+  <div class="lang-title hyfont">[민원인에게 자국언어를 선택하게 알려주세요]</div>
+  <div class="button-list">
+    <button type="button" onclick="selectLangPair('en')">Report Consultation(영어)</button>
+    <button type="button" onclick="selectLangPair('zh')">报案咨询(중국어)</button>
+    <button type="button" onclick="selectLangPair('vi')">Tư vấn báo án(베트남어)</button>
+    <button type="button" onclick="selectLangPair('uz')">Ariza bo‘yicha maslahat(우즈벡어)</button>
+    <button type="button" onclick="selectLangPair('ne')">उजुरी परामर्श(네팔어)</button>
+    <button type="button" onclick="selectLangPair('km')">ការពិគ្រោះការរាយការណ៍(캄보디아어)</button>
+    <button type="button" onclick="selectLangPair('th')">ปรึกษาการแจ้งความ(태국어)</button>
+    <button type="button" onclick="selectLangPair('fil')">Konsultasyong Ulat(필리핀어)</button>
+    <button type="button" onclick="selectLangPair('si')">ප්‍රකාශ කිරීම සාකච්ඡාව(스리랑카어)</button>
+    <button type="button" onclick="selectLangPair('id')">Konsultasi Laporan(인도네시아어)</button>
+    <button type="button" class="manual-button" onclick="showScreen('manual')">📘 메뉴얼(경찰관용)</button>
+  </div>
+</div>
+
+<!-- 신고 안내 (언어쌍 반영) -->
+<div id="report" class="hidden screen" data-langs="ko en">
+  <div class="instruction-banner">
+    <span class="line hyfont lang-line ko">[손가락으로 경찰관에게 알려주세요]</span>
+    <span class="line hyfont lang-line en">[Point with your finger and tell the police officer]</span>
+    <span class="line hyfont lang-line zh">[请用手指给警察指示，并说明情况]</span>
+    <span class="line hyfont lang-line vi">[Hãy chỉ tay và nói với cảnh sát]</span>
+    <span class="line hyfont lang-line uz">[Barmog'ingiz bilan ko'rsatib, politsiyaga ayting]</span>
+    <span class="line hyfont lang-line ne">[औंलाले देखाउँदै प्रहरीलाई बताउनुहोस्]</span>
+    <span class="line hyfont lang-line th">[โปรดชี้ด้วยนิ้วแล้วบอกเจ้าหน้าที่ตำรวจ]</span>
+    <span class="line hyfont lang-line km">[សូមចង្អុលបង្ហាញ ហើយប្រាប់ប៉ូលិស]</span>
+    <span class="line hyfont lang-line fil">[Ituro gamit ang daliri at sabihin sa pulis]</span>
+    <span class="line hyfont lang-line si">[ඔබේ ඇඟිල්ලෙන් පෙන්වා පොලීසියට කියන්න]</span>
+    <span class="line hyfont lang-line id">[Tunjuk dengan jari dan beri tahu polisi]</span>
+  </div>
+
+  <div class="multi-lang" data-section="1">
+    <div class="title-text">
+      <span class="title-line lang-line ko">1. 어떤 사건인가요?&nbsp;</span>
+      <span class="title-line lang-line en">What happened?</span>
+      <span class="title-line lang-line zh">发生了什么事？</span>
+      <span class="title-line lang-line vi">Chuyện gì đã xảy ra?</span>
+      <span class="title-line lang-line uz">Nima bo‘ldi?</span>
+      <span class="title-line lang-line ne">के भयो?</span>
+      <span class="title-line lang-line th">เกิดอะไรขึ้น?</span>
+      <span class="title-line lang-line km">មានអ្វីកើតឡើង?</span>
+      <span class="title-line lang-line fil">Anong nangyari?</span>
+      <span class="title-line lang-line si">මොකද්ද වුණේ?</span>
+      <span class="title-line lang-line id">Apa yang terjadi?</span>
+    </div>
+    <div class="box-row eight-cells bump2">
+      <div class="box-cell">
+        <span class="lang-line ko">잃어버렸다</span><span class="lang-line en">Lost</span><span class="lang-line zh">丢失了</span><span class="lang-line vi">Bị mất</span><span class="lang-line uz">Yo‘qotdim</span><span class="lang-line ne">हराएको छ</span><span class="lang-line th">ทำหาย</span><span class="lang-line km">បាត់</span><span class="lang-line fil">Nawala</span><span class="lang-line si">අහිමි විය</span><span class="lang-line id">Hilang</span>
+      </div>
+      <div class="box-cell">
+        <span class="lang-line ko">습득하였다</span><span class="lang-line en">Found</span><span class="lang-line zh">捡到了</span><span class="lang-line vi">Nhặt được</span><span class="lang-line uz">Topib oldim</span><span class="lang-line ne">फेला पर्यो</span><span class="lang-line th">เจอ/เก็บได้</span><span class="lang-line km">រកឃើញ</span><span class="lang-line fil">Natagpuan</span><span class="lang-line si">හමු විය</span><span class="lang-line id">Ditemukan</span>
+      </div>
+      <div class="box-cell">
+        <span class="lang-line ko">도난당했다</span><span class="lang-line en">Was stolen</span><span class="lang-line zh">被偷了</span><span class="lang-line vi">Bị trộm</span><span class="lang-line uz">O‘g‘irlandi</span><span class="lang-line ne">चोरी भयो</span><span class="lang-line th">ถูกขโมย</span><span class="lang-line km">ត្រូវបានលួច</span><span class="lang-line fil">Ninakaw</span><span class="lang-line si">කල්ලියෙන් ගත්තා/කඹය</span><span class="lang-line id">Dicuri</span>
+      </div>
+      <div class="box-cell">
+        <span class="lang-line ko">폭행당했다</span><span class="lang-line en">Was assaulted</span><span class="lang-line zh">被殴打了</span><span class="lang-line vi">Bị hành hung</span><span class="lang-line uz">Hujumga uchradim</span><span class="lang-line ne">कुटपिट भयो</span><span class="lang-line th">ถูกทำร้าย</span><span class="lang-line km">ត្រូវបានវាយប្រហារ</span><span class="lang-line fil">Inatake/Binugbog</span><span class="lang-line si">හෙළාදැකීම/අතුරුදහන්</span><span class="lang-line id">Diserang</span>
+      </div>
+      <div class="box-cell">
+        <span class="lang-line ko">교통사고 당했다</span><span class="lang-line en">Had a traffic accident</span><span class="lang-line zh">发生交通事故</span><span class="lang-line vi">Bị tai nạn giao thông</span><span class="lang-line uz">Yo‘l-transport hodisasiga uchradim</span><span class="lang-line ne">सडक दुर्घटना भयो</span><span class="lang-line th">เกิดอุบัติเหตุจราจร</span><span class="lang-line km">គ្រោះថ្នាក់ចរាចរណ៍</span><span class="lang-line fil">Aksidente sa trapiko</span><span class="lang-line si">ගමන් ගැටුමක් විය</span><span class="lang-line id">Kecelakaan lalu lintas</span>
+      </div>
+      <div class="box-cell">
+        <span class="lang-line ko">사기 당했다</span><span class="lang-line en">Was scammed</span><span class="lang-line zh">被诈骗了</span><span class="lang-line vi">Bị lừa đảo</span><span class="lang-line uz">Firibgarlikka uchradim</span><span class="lang-line ne">ठगी भयो</span><span class="lang-line th">ถูกหลอกลวง</span><span class="lang-line km">ត្រូវបានបន្លំ</span><span class="lang-line fil">Naloko</span><span class="lang-line si">වංචා කළා</span><span class="lang-line id">Ditipu</span>
+      </div>
+      <div class="box-cell">
+        <span class="lang-line ko">실종되었다</span><span class="lang-line en">Went missing</span><span class="lang-line zh">失踪了</span><span class="lang-line vi">Mất tích</span><span class="lang-line uz">Bedarak yo‘qoldi</span><span class="lang-line ne">बेपत्ता भयो</span><span class="lang-line th">หายตัวไป</span><span class="lang-line km">បាត់ខ្លួន</span><span class="lang-line fil">Nawawala</span><span class="lang-line si">අතුරුදහන් විය</span><span class="lang-line id">Menghilang</span>
+      </div>
+      <div class="box-cell">
+        <span class="lang-line ko">아프다</span><span class="lang-line en">I'm sick</span><span class="lang-line zh">我生病了</span><span class="lang-line vi">Bị ốm</span><span class="lang-line uz">Kasaldaman</span><span class="lang-line ne">म बिरामी छु</span><span class="lang-line th">ฉันป่วย</span><span class="lang-line km">ខ្ញុំឈឺ</span><span class="lang-line fil">May sakit ako</span><span class="lang-line si">මට අසනීප</span><span class="lang-line id">Saya sakit</span>
+      </div>
+      <div class="box-cell">
+        <span class="lang-line ko">강간당했다</span><span class="lang-line en">I was raped</span><span class="lang-line zh">我被强奸了</span><span class="lang-line vi">Tôi đã bị cưỡng hiếp</span><span class="lang-line uz">Meni zo'rlashdi</span><span class="lang-line ne">मलाई बलात्कार गरियो।</span><span class="lang-line th">ฉันถูกข่มขืน</span><span class="lang-line km">ខ្ញុំត្រូវបានបំពានផ្លូវភេទ</span><span class="lang-line fil">Ginahasa ako</span><span class="lang-line si">මා බලතලයෙන් ඇතුල් විය</span><span class="lang-line id">Saya diperkosa</span>
+      </div>
+      <div class="box-cell">
+        <span class="lang-line ko">스토킹 당하고있다</span><span class="lang-line en">being stalked</span><span class="lang-line zh">有人跟着</span><span class="lang-line vi">Có ai đó đang theo dõi tôi</span><span class="lang-line uz">Kimdir meni kuzatib bormoqda</span><span class="lang-line ne">कोही मलाई पछ्याउँदै छ।</span><span class="lang-line th">มีคนกำลังติดตามฉันอยู่</span><span class="lang-line km">មាននរណាម្នាក់តាមដានខ្ញុំ</span><span class="lang-line fil">May sumusunod sa akin</span><span class="lang-line si">කවුරුහරි මාව අනුකූල කරයි</span><span class="lang-line id">Ada yang mengikuti saya</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 언제? 어디서? -->
+  <div class="multi-lang" data-section="2">
+    <div class="title-text">
+      <span class="title-line lang-line ko">2. 언제? 어디서?&nbsp;</span>
+      <span class="title-line lang-line en">When? Where?</span>
+      <span class="title-line lang-line zh">什么时候？在哪里？</span>
+      <span class="title-line lang-line vi">Khi nào? Ở đâu?</span>
+      <span class="title-line lang-line uz">Qachon? Qayerda?</span>
+      <span class="title-line lang-line ne">कहिले? कहाँ?</span>
+      <span class="title-line lang-line th">เมื่อไหร่? ที่ไหน?</span>
+      <span class="title-line lang-line km">ពេលណា? នៅឯណា?</span>
+      <span class="title-line lang-line fil">Kailan? Saan?</span>
+      <span class="title-line lang-line si">කවදා? කොහෙද?</span>
+      <span class="title-line lang-line id">Kapan? Di mana?</span>
+    </div>
+    <div class="box-row three-cells bump2">
+      <div class="box-cell" id="when-cell">
+        <span class="lang-line ko">언제</span>
+        <div class="filter-line when">
+          <input type="date" id="when-date" aria-label="날짜 선택">
+          <input type="time" id="when-time" aria-label="시간 선택">
+        </div>
+        <span class="lang-line en">When</span>
+        <span class="lang-line zh">什么时候</span>
+        <span class="lang-line vi">Khi nào</span>
+        <span class="lang-line uz">Qachon</span>
+        <span class="lang-line ne">कहिले</span>
+        <span class="lang-line th">เมื่อไหร่</span>
+        <span class="lang-line km">ពេលណា</span>
+        <span class="lang-line fil">Kailan</span>
+        <span class="lang-line si">කවදා</span>
+        <span class="lang-line id">Kapan</span>
+      </div>
+
+      <div class="box-cell" id="where-cell">
+        <span class="lang-line ko">어디서</span>
+        <div class="filter-line where">
+          <input type="text" id="where-address" placeholder="주소 입력 / Address" aria-label="주소 입력" autocapitalize="off" autocomplete="off" spellcheck="false" inputmode="text">
+          <div class="right-actions">
+            <button type="button" id="place-toggle" class="gmaps-link" aria-expanded="false" aria-controls="place-panel">장소선택</button>
+          </div>
+        </div>
+
+        <div id="place-panel" class="place-panel hidden" role="group" aria-label="장소 선택"></div>
+
+        <span class="lang-line en">Where</span>
+        <span class="lang-line zh">在哪里</span>
+        <span class="lang-line vi">Ở đâu</span>
+        <span class="lang-line uz">Qayerda</span>
+        <span class="lang-line ne">कहाँ</span>
+        <span class="lang-line th">ที่ไหน</span>
+        <span class="lang-line km">កន្លែងណា</span>
+        <span class="lang-line fil">Saan</span>
+        <span class="lang-line si">කොහෙද</span>
+        <span class="lang-line id">Di mana</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 누가? -->
+  <div class="multi-lang" data-section="3">
+    <div class="title-text">
+      <span class="title-line lang-line ko">3. 누가?&nbsp;</span>
+      <span class="title-line lang-line en">Who?</span>
+      <span class="title-line lang-line zh">谁？</span>
+      <span class="title-line lang-line vi">Ai?</span>
+      <span class="title-line lang-line uz">Kim?</span>
+      <span class="title-line lang-line ne">को?</span>
+      <span class="title-line lang-line th">ใคร?</span>
+      <span class="title-line lang-line km">នរណា?</span>
+      <span class="title-line lang-line fil">Sino?</span>
+      <span class="title-line lang-line si">කවුද?</span>
+      <span class="title-line lang-line id">Siapa?</span>
+    </div>
+    <div class="box-row seven-cells bump2">
+      <div class="box-cell"><span class="lang-line ko">나는(내가)</span><span class="lang-line en">I</span><span class="lang-line zh">我</span><span class="lang-line vi">Tôi</span><span class="lang-line uz">Men</span><span class="lang-line ne">म</span><span class="lang-line th">ฉัน</span><span class="lang-line km">ខ្ញុំ</span><span class="lang-line fil">Ako</span><span class="lang-line si">මම</span><span class="lang-line id">Saya</span></div>
+      <div class="box-cell"><span class="lang-line ko">친구가</span><span class="lang-line en">My friend</span><span class="lang-line zh">朋友</span><span class="lang-line vi">Bạn tôi</span><span class="lang-line uz">Do‘stim</span><span class="lang-line ne">मेरो साथी</span><span class="lang-line th">เพื่อนของฉัน</span><span class="lang-line km">មិត្តរបស់ខ្ញុំ</span><span class="lang-line fil">Kaibigan ko</span><span class="lang-line si">මගේ යාළුවා</span><span class="lang-line id">Teman saya</span></div>
+      <div class="box-cell"><span class="lang-line ko">남편이</span><span class="lang-line en">My husband</span><span class="lang-line zh">丈夫</span><span class="lang-line vi">Chồng tôi</span><span class="lang-line uz">Erim</span><span class="lang-line ne">मेरो श्रीमान</span><span class="lang-line th">สามีของฉัน</span><span class="lang-line km">ប្តីរបស់ខ្ញុំ</span><span class="lang-line fil">Asawa kong lalaki</span><span class="lang-line si">මගේ ස්වාමිපුරුෂයා</span><span class="lang-line id">Suami saya</span></div>
+      <div class="box-cell"><span class="lang-line ko">부인이</span><span class="lang-line en">My wife</span><span class="lang-line zh">妻子</span><span class="lang-line vi">Vợ tôi</span><span class="lang-line uz">Xotinim</span><span class="lang-line ne">मेरो श्रीमती</span><span class="lang-line th">ภรรยาของฉัน</span><span class="lang-line km">ភរិយារបស់ខ្ញុំ</span><span class="lang-line fil">Asawa kong babae</span><span class="lang-line si">මගේ භාර්යාව</span><span class="lang-line id">Istri saya</span></div>
+      <div class="box-cell"><span class="lang-line ko">자식이</span><span class="lang-line en">My child</span><span class="lang-line zh">孩子</span><span class="lang-line vi">Con tôi</span><span class="lang-line uz">Farzandim</span><span class="lang-line ne">मेरो बच्चा</span><span class="lang-line th">ลูกของฉัน</span><span class="lang-line km">កូនរបស់ខ្ញុំ</span><span class="lang-line fil">Anak ko</span><span class="lang-line si">මගේ දරුවා</span><span class="lang-line id">Anak saya</span></div>
+      <div class="box-cell"><span class="lang-line ko">모르는 사람이</span><span class="lang-line en">A stranger</span><span class="lang-line zh">陌生人</span><span class="lang-line vi">Người lạ</span><span class="lang-line uz">Begona</span><span class="lang-line ne">अपरिचित व्यक्ति</span><span class="lang-line th">คนแปลกหน้า</span><span class="lang-line km">មនុស្សមិនស្គាល់</span><span class="lang-line fil">Di-kilalang tao</span><span class="lang-line si">නොදන්නා පුද්ගලයෙක්</span><span class="lang-line id">Orang tak dikenal</span></div>
+      <div class="box-cell"><span class="lang-line ko">직장 동료가</span><span class="lang-line en">Coworker</span><span class="lang-line zh">同事</span><span class="lang-line vi">Đồng nghiệp</span><span class="lang-line uz">Hamkasbim</span><span class="lang-line ne">मेरो सहकर्मी</span><span class="lang-line th">เพื่อนร่วมงาน</span><span class="lang-line km">មិត្តរួមការងារ</span><span class="lang-line fil">Katrabaho</span><span class="lang-line si">සේවායෝජකයෙකි</span><span class="lang-line id">Rekan kerja</span></div>
+      <div class="box-cell"><span class="lang-line ko">직장 상사가</span><span class="lang-line en">boss at work</span><span class="lang-line zh">老板在工作</span><span class="lang-line vi">Giám sát công việc</span><span class="lang-line uz">ishda boshliq</span><span class="lang-line ne">काममा हाकिम</span><span class="lang-line th">เจ้านายที่ทำงาน</span><span class="lang-line km">មេធ្វើការ</span><span class="lang-line fil">Boss sa trabaho</span><span class="lang-line si">වැඩේ හිමිකරු</span><span class="lang-line id">Atasan di tempat kerja</span></div>
+    </div>
+  </div>
+
+  <!-- 4. 무엇을? -->
+  <div class="multi-lang" data-section="4">
+    <div class="title-text">
+      <span class="title-line lang-line ko">4. 무엇을?&nbsp;</span>
+      <span class="title-line lang-line en">What?</span>
+      <span class="title-line lang-line zh">什么？</span>
+      <span class="title-line lang-line vi">Cái gì?</span>
+      <span class="title-line lang-line uz">Nima?</span>
+      <span class="title-line lang-line ne">के?</span>
+      <span class="title-line lang-line th">อะไร?</span>
+      <span class="title-line lang-line km">អ្វី?</span>
+      <span class="title-line lang-line fil">Ano?</span>
+      <span class="title-line lang-line si">මොනවද?</span>
+      <span class="title-line lang-line id">Apa?</span>
+    </div>
+    <div class="box-row eight-cells bump2">
+      <div class="box-cell"><span class="lang-line ko">돈</span><span class="lang-line en">Money</span><span class="lang-line zh">钱</span><span class="lang-line vi">Tiền</span><span class="lang-line uz">Pul</span><span class="lang-line ne">पैसा</span><span class="lang-line th">เงิน</span><span class="lang-line km">ប្រាក់</span><span class="lang-line fil">Pera</span><span class="lang-line si">මුදල්</span><span class="lang-line id">Uang</span></div>
+      <div class="box-cell"><span class="lang-line ko">휴대폰</span><span class="lang-line en">Mobile phone</span><span class="lang-line zh">手机</span><span class="lang-line vi">Điện thoại</span><span class="lang-line uz">Uyali telefon</span><span class="lang-line ne">सेल फोन</span><span class="lang-line th">โทรศัพท์มือถือ</span><span class="lang-line km">ទូរស័ព្ទចល័ត</span><span class="lang-line fil">Cellphone</span><span class="lang-line si">ජංගම දුරකථන</span><span class="lang-line id">Ponsel</span></div>
+      <div class="box-cell"><span class="lang-line ko">지갑</span><span class="lang-line en">Wallet</span><span class="lang-line zh">钱包</span><span class="lang-line vi">Ví</span><span class="lang-line uz">Hamyon</span><span class="lang-line ne">पर्स</span><span class="lang-line th">กระเป๋าสตางค์</span><span class="lang-line km">កាបូប</span><span class="lang-line fil">Pitaka</span><span class="lang-line si">පසුම්බිය</span><span class="lang-line id">Dompet</span></div>
+      <div class="box-cell"><span class="lang-line ko">외국인등록증</span><span class="lang-line en">Alien Registration Card</span><span class="lang-line zh">外国人登录证</span><span class="lang-line vi">Thẻ đăng ký người nước ngoài</span><span class="lang-line uz">Chet ellik ro'yxatga olish kartasi</span><span class="lang-line ne">विदेशी दर्ता कार्ड</span><span class="lang-line th">บัตรลงทะเบียนคนต่างด้าว</span><span class="lang-line km">កាតចុះបញ្ជីជនបរទេស</span><span class="lang-line fil">Alien Registration Card</span><span class="lang-line si">විදේශික ලියාපදිංචි කාඩ්පත</span><span class="lang-line id">Kartu Registrasi Orang Asing</span></div>
+      <div class="box-cell"><span class="lang-line ko">오토바이</span><span class="lang-line en">Motorcycle</span><span class="lang-line zh">摩托车</span><span class="lang-line vi">Xe máy</span><span class="lang-line uz">Mototsikl</span><span class="lang-line ne">मोटरसाइकल</span><span class="lang-line th">รถจักรยานยนต์</span><span class="lang-line km">ម៉ូតូ</span><span class="lang-line fil">Motorsiklo</span><span class="lang-line si">මෝටර්සයිකල්</span><span class="lang-line id">Sepeda motor</span></div>
+      <div class="box-cell"><span class="lang-line ko">자전거</span><span class="lang-line en">Bicycle</span><span class="lang-line zh">自行车</span><span class="lang-line vi">Xe đạp</span><span class="lang-line uz">Velosiped</span><span class="lang-line ne">साइकल</span><span class="lang-line th">จักรยาน</span><span class="lang-line km">កង់</span><span class="lang-line fil">Bisikleta</span><span class="lang-line si">සයිකල්</span><span class="lang-line id">Sepeda</span></div>
+    </div>
+  </div>
+
+  <!-- 5. 무엇인가요? -->
+  <div class="multi-lang" data-section="5">
+    <div class="title-text">
+      <div>
+        <span class="title-line lang-line ko">5. 무엇인가요?</span>
+        <span class="title-line lang-line en">What?</span>
+        <span class="title-line lang-line zh">什么？</span>
+        <span class="title-line lang-line vi">Gì?</span>
+        <span class="title-line lang-line uz">nima?</span>
+        <span class="title-line lang-line ne">के?</span>
+        <span class="title-line lang-line th">อะไร?</span>
+        <span class="title-line lang-line km">អ្វី?</span>
+        <span class="title-line lang-line fil">Ano?</span>
+        <span class="title-line lang-line si">මොනවද?</span>
+        <span class="title-line lang-line id">Apa?</span>
+      </div>
+      <div class="right-actions who-toggles">
+        <button type="button" id="who-self-btn" class="gmaps-link" aria-pressed="true">본인 / Self</button>
+        <button type="button" id="who-other-btn" class="gmaps-link" aria-pressed="false">그사람 / That person</button>
+      </div>
+    </div>
+    <div class="box-row six-cells bump2">
+      <div class="box-cell"><span class="lang-line ko">이름</span><span class="lang-line en">Name</span><span class="lang-line zh">姓名</span><span class="lang-line vi">Họ và tên</span><span class="lang-line uz">Ism</span><span class="lang-line ne">नाम</span><span class="lang-line th">ชื่อ</span><span class="lang-line km">ឈ្មោះ</span><span class="lang-line fil">Pangalan</span><span class="lang-line si">නම</span><span class="lang-line id">Nama</span></div>
+      <div class="box-cell"><span class="lang-line ko">국적</span><span class="lang-line en">Nationality</span><span class="lang-line zh">国籍</span><span class="lang-line vi">Quốc tịch</span><span class="lang-line uz">Fuqaroligi</span><span class="lang-line ne">राष्ट्रियता</span><span class="lang-line th">สัญชาติ</span><span class="lang-line km">សញ្ជាតិ</span><span class="lang-line fil">Nasyonalidad</span><span class="lang-line si">ජාතිකත්වය</span><span class="lang-line id">Kewarganegaraan</span></div>
+      <div class="box-cell"><span class="lang-line ko">연락처</span><span class="lang-line en">Contact</span><span class="lang-line zh">联系方式</span><span class="lang-line vi">Liên hệ</span><span class="lang-line uz">Aloqa</span><span class="lang-line ne">सम्पर्क</span><span class="lang-line th">ข้อมูลติดต่อ</span><span class="lang-line km">ទំនាក់ទំនង</span><span class="lang-line fil">Kontak</span><span class="lang-line si">සම්බන්ධය</span><span class="lang-line id">Kontak</span></div>
+      <div class="box-cell"><span class="lang-line ko">생년월일</span><span class="lang-line en">Date of birth</span><span class="lang-line zh">出生日期</span><span class="lang-line vi">Ngày sinh</span><span class="lang-line uz">Tug‘ilgan sana</span><span class="lang-line ne">जन्ममिति</span><span class="lang-line th">วันเดือนปีเกิด</span><span class="lang-line km">ថ្ងៃខែឆ្នាំកំណើត</span><span class="lang-line fil">Araw ng kapanganakan</span><span class="lang-line si">උපන්දිනය</span><span class="lang-line id">Tanggal lahir</span></div>
+      <div class="box-cell"><span class="lang-line ko">집주소</span><span class="lang-line en">Home address</span><span class="lang-line zh">住址</span><span class="lang-line vi">Địa chỉ nhà</span><span class="lang-line uz">Uy manzili</span><span class="lang-line ne">घरको ठेगाना</span><span class="lang-line th">ที่อยู่บ้าน</span><span class="lang-line km">អាសយដ្ឋានផ្ទះ</span><span class="lang-line fil">Tirahan</span><span class="lang-line si">ගෘහ ලිපිනය</span><span class="lang-line id">Alamat rumah</span></div>
+      <div class="box-cell"><span class="lang-line ko">직업</span><span class="lang-line en">Occupation</span><span class="lang-line zh">职业</span><span class="lang-line vi">Nghề nghiệp</span><span class="lang-line uz">Kasb</span><span class="lang-line ne">पेशा</span><span class="lang-line th">อาชีพ</span><span class="lang-line km">មុខរបរ</span><span class="lang-line fil">Trabaho</span><span class="lang-line si">වෘත්තිය</span><span class="lang-line id">Pekerjaan</span></div>
+    </div>
+  </div>
+
+  <!-- 6. 보여주세요 -->
+  <div class="multi-lang" data-section="6">
+    <div class="title-text">
+      <span class="title-line lang-line ko">6. 보여주세요&nbsp;</span>
+      <span class="title-line lang-line en">Please show</span>
+      <span class="title-line lang-line zh">请出示</span>
+      <span class="title-line lang-line vi">Vui lòng xuất trình</span>
+      <span class="title-line lang-line uz">Iltimos, ko‘rsating</span>
+      <span class="title-line lang-line ne">कृपया देखाउनुहोस्</span>
+      <span class="lang-line th">โปรดแสดง</span>
+      <span class="lang-line km">សូមបង្ហាញ</span>
+      <span class="lang-line fil">Pakipakita</span>
+      <span class="lang-line si">කරුණාකර පෙන්වන්න</span>
+      <span class="lang-line id">Mohon tunjukkan</span>
+    </div>
+    <div class="box-row five-cells bump2">
+      <div class="box-cell"><span class="lang-line ko">여권</span><span class="lang-line en">Passport</span><span class="lang-line zh">护照</span><span class="lang-line vi">Hộ chiếu</span><span class="lang-line uz">Pasport</span><span class="lang-line ne">राहदानी</span><span class="lang-line th">หนังสือเดินทาง</span><span class="lang-line km">លិខិតឆ្លងដែន</span><span class="lang-line fil">Pasaporte</span><span class="lang-line si">ගමන් බලපත්‍රය</span><span class="lang-line id">Paspor</span></div>
+      <div class="box-cell"><span class="lang-line ko">외국인등록증</span><span class="lang-line en">Alien Registration Card</span><span class="lang-line zh">外国人登录证</span><span class="lang-line vi">Thẻ đăng ký người nước ngoài</span><span class="lang-line uz">Chet ellik ro'yxatga olish kartasi</span><span class="lang-line ne">विदेशी दर्ता कार्ड</span><span class="lang-line th">บัตรลงทะเบียนคนต่างด้าว</span><span class="lang-line km">កាតចុះបញ្ជីជនបរទេស</span><span class="lang-line fil">Alien Registration Card</span><span class="lang-line si">විදේශික ලියාපදිංචි කාඩ්පත</span><span class="lang-line id">Kartu Registrasi Orang Asing</span></div>
+    </div>
+  </div>
+
+  <!-- 7. 기타 상담 -->
+  <div class="multi-lang" data-section="7">
+    <div class="title-text">
+      <span class="title-line lang-line ko">7. 기타 상담&nbsp;</span>
+      <span class="title-line lang-line en">Other Consultation</span>
+      <span class="title-line lang-line zh">其他咨询</span>
+      <span class="title-line lang-line vi">Tư vấn khác</span>
+      <span class="title-line lang-line uz">Boshqa maslahat</span>
+      <span class="title-line lang-line ne">अन्य परामर्श</span>
+      <span class="title-line lang-line th">ปรึกษาอื่น ๆ</span>
+      <span class="title-line lang-line km">ការពិគ្រោះផ្សេងទៀត</span>
+      <span class="title-line lang-line fil">Iba pang konsultasyon</span>
+      <span class="title-line lang-line si">වෙනත් උපදේශනය</span>
+      <span class="title-line lang-line id">Konsultasi lainnya</span>
+    </div>
+    <div class="tip" style="margin-top:6px; font-weight:700;">[단순 괴롭힘, 임금체불 등은 고용노동부로 안내해주세요]</div>
+    <textarea class="other-consult" id="other-consult"
+      placeholder="예: 길 안내, 상사의 폭언 • 폭행 • 괴롭힘, 임금체불
+ex: directions, boss’s verbal/physical abuse/harassment, unpaid wages"></textarea>
+  </div>
+
+  <!-- 8. 최종 정리 -->
+  <div class="multi-lang" id="final" data-section="8">
+    <div class="title-text">
+      <span class="title-line lang-line ko">8. 최종 요약[경찰관용]</span>
+    </div>
+
+    <div class="guideline">[접수 및 상담 전, 신속 초동조치 용도 / (가로)는 인적사항이므로 재확인]</div>
+
+    <div class="final-wrap">
+      <textarea id="final-summary" class="final-summary" placeholder=""></textarea>
+      <button type="button" id="reset-button" class="gmaps-link inside">다시 작성</button>
+    </div>
+
+    <div class="note-row">
+      <div class="extra-note">[위 사항은 저장되지 않으므로 캡쳐하기를 눌러주세요]</div>
+      <button type="button" id="capture-button" class="gmaps-link">캡쳐하기</button>
+    </div>
+  </div>
+
+  <button type="button" class="back-button" onclick="showScreen('lang-select')">
+    <span class="lang-line ko">뒤로가기</span><span aria-hidden="true"> / </span>
+    <span class="lang-line en">Back</span>
+    <span class="lang-line zh">返回</span>
+    <span class="lang-line vi">Quay lại</span>
+    <span class="lang-line uz">Orqaga</span>
+    <span class="lang-line ne">फिर्ता जानुहोस्</span>
+    <span class="lang-line th">กลับ</span>
+    <span class="lang-line km">ត្រឡប់ក្រោយ</span>
+    <span class="lang-line fil">Bumalik</span>
+    <span class="lang-line si">ආපසු</span>
+    <span class="lang-line id">Kembali</span>
+  </button>
+</div>
+
+<!-- ===== 메뉴얼(경찰관용) 화면 ===== -->
+<div id="manual" class="hidden screen" aria-labelledby="manual-title">
+  <h1 id="manual-title" class="hyfont">외국인 상담「폴톡」메뉴얼</h1>
+  <!--홍보영상 링크 -->
+  <div style="text-align:center; margin:6px 0 12px 0;">
+    <a href="https://www.naver.com" target="_blank" rel="noopener" style="font-weight:800; text-decoration:underline;">홍보영상</a>
+  </div>
+
+  <div class="section">
+    <h2>1) 개요</h2>
+    <p>언어 장벽이 있는 민원인과 신속히 의사소통하기 위한 다국어 안내용 웹앱입니다. 민원인이 <b>자국어 버튼을 직접 선택</b>하여 경찰관에게 상황을 손으로 알려줄 수 있도록 제작되었습니다.(번역 프로그램 이용, 외국어 문장을 음성 대화 및 타이핑 하는 것을, 유형별 흐름에 따라 직관적으로 단순화 시킴)</p>
+    <div class="tip"><b>Tip.</b> 모든 내용은 저장되지 않습니다. 필요 시 <b>8. 최종 요약 → 캡쳐하기</b>를 사용하세요.</div>
+  </div>
+
+  <div class="section">
+    <h2>2) 사용 순서</h2>
+    <ol>
+      <li><b>언어 선택:</b> 첫 화면에서 민원인에게 자국 언어 선택을 안내합니다.</li>
+      <li><b>어떤 사건?</b> 민원인이 해당 항목을 눌러 상황을 표시합니다(민원인의 상담 의도 파악).</li>
+      <li><b>언제 / 어디서:</b> 날짜·시간을 선택 후, <b>장소선택</b>을 눌러 집/회사/상점/노상/기타를 빠르게 입력할 수 있습니다.</li>
+      <li><b>누가:</b> 본인/지인/가족/모르는 사람 중 해당 인물을 선택합니다.</li>
+      <li><b>무엇을:</b> 금품·물건 등 대상물을 선택합니다.</li>
+      <li><b>무엇인가요:</b> 제목 옆 <b>본인 / 그사람</b> 버튼을 선택한 뒤,  민원인 또는 대상자의 신원 등 필요한 인적사항을 (괄호)로 누적 표기합니다.(인적사항은 국가별 작성을 할 수 없으므로, 7번의 신분증을 보고 별도 메모하시기 바랍니다.)</li>
+      <li><b>보여주세요:</b> 상담 민원인의 여권·외국인등록증 등 제시가 필요한 증빙을 안내합니다。(6번 민원인의 인적사항을 메모하기 위함)</li>
+      <li><b>기타 상담:</b> 외국인 근로자의 인권침해 신고(폭언, 괴롭힘 등)는 사항 파악 후, 고용노동부로 연결해주세요.(폭행 등만 경찰 업무)</li>
+      <li><b>최종 요약[경찰관용]:</b> 선택·입력된 내용이 자동 정리됩니다. <b>다시 작성</b>으로 초기화할 수 있으며, <b>캡쳐하기</b>로 이미지 저장 및 공유가 가능합니다.</li>
+    </ol>
+  </div>
+
+  <div class="section">
+    <h2>3) 사용 팁</h2>
+    <ol>
+      <li><b>자동 글자 맞춤:</b> 휴대폰 별 화면 크기에 따라 글씨가 자동 조정됩니다.</li>
+      <li><b>주소 입력 보조:</b> 장소선택 버튼으로 빠르게 기본 장소를 입력할 수 있습니다.</li>
+      <li><b>보안/개인정보:</b> 입력 내용은 기기에 저장되지 않습니다. 필요 시 캡쳐하기를 참고하세요.</li>
+      <li><b>언어 전환:</b> 다른 언어로 다시 안내가 필요하면 <b>뒤로가기</b>로 언어 선택 화면으로 돌아가 새 언어를 선택하세요.</li>
+      <li><b>캡쳐하기:</b> 모든 내용은 저장되지 않으므로 <b>“캡쳐하기”</b>를 사용하세요. 최종 요약 내용이 <b>새창으로 열립니다.</b>(새창에서 열린 내용 저장 가능)</li>
+    </ol>
+  </div>
+
+  <div class="section">
+    <h2>4) 안내 사항</h2>
+    <ol>
+      <li>외국어의 번역은 파파고 및 구글 번역을 활용하였습니다. 문화적 차이로 번역 오류 등이 있을 수 있습니다. 개선 요청 사항이 있으시면 언제든지 연락주세요, 적극 반영하겠습니다.</li>
+      <li>문의사항은 전남청 영암경찰서 범죄예방대응과로 연락주세요(경장 김진영 061-470-0346)</li>
+    </ol>
+  </div>
+
+  <!-- 메뉴얼 화면의 뒤로가기 -->
+  <button type="button" class="back-button" onclick="showScreen('lang-select')">
+    <span class="lang-line ko">뒤로가기</span>
+  </button>
+</div>
+
+
+<!-- ✅ 하단 고정문구 (모든 화면 공통 노출) -->
+<div class="footer-fixed" aria-hidden="true">
+  <div class="brand-line">언어가 달라도 든든한 이름 「폴톡」</div>
+  <div class="copy-right">Copyright © 영암경찰서 범죄예방대응과</div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+  /* 전역 복사/우클릭/선택/드래그 차단 */
+  ['copy','cut','contextmenu'].forEach(evt =>
+    document.addEventListener(evt, e => e.preventDefault(), {passive:false})
+  );
+  document.addEventListener('selectstart', e => e.preventDefault(), {passive:false});
+  document.addEventListener('dragstart',  e => e.preventDefault(), {passive:false});
+
+  function showScreen(id) {
+    ['lang-select','report','manual'].forEach(s => {
+      const el = document.getElementById(s);
+      if (el) el.classList.add('hidden');
+    });
+    const target = document.getElementById(id);
+    if (target) target.classList.remove('hidden');
+    window.scrollTo(0,0);
+    requestFitAll();
+    fitAdaptiveOneLines();
+  }
+
+  /* 텍스트 자동 축소 */
+  const MIN_FONT_PX = 12;
+  const STEP = 0.5;
+  const MAX_ITER = 60;
+
+  function fits(el){
+    return el.scrollHeight <= el.clientHeight && el.scrollWidth <= el.clientWidth;
+  }
+  function fitOneCell(cell){
+    cell.classList.remove('grow-height');
+    cell.style.fontSize = '';
+    let computed = parseFloat(getComputedStyle(cell).fontSize);
+    let iter = 0;
+    while(!fits(cell) && computed > MIN_FONT_PX && iter < MAX_ITER){
+      computed = Math.max(MIN_FONT_PX, computed - STEP);
+      cell.style.fontSize = computed + 'px';
+      iter++;
+    }
+    if(!fits(cell)){ cell.classList.add('grow-height'); }
+  }
+  function fitAllCells(){
+    document.querySelectorAll('.box-cell').forEach(fitOneCell);
+  }
+  let fitTimer = null;
+  function requestFitAll(){
+    if (fitTimer) cancelAnimationFrame(fitTimer);
+    fitTimer = requestAnimationFrame(fitAllCells);
+  }
+
+  function fitOneLine(el){
+    if (!el) return;
+    el.style.fontSize = '';
+    let size = parseFloat(getComputedStyle(el).fontSize) || 16;
+    let tries = 0;
+    while(el.scrollWidth > el.clientWidth && size > MIN_FONT_PX && tries < MAX_ITER){
+      size = Math.max(MIN_FONT_PX, size - STEP);
+      el.style.fontSize = size + 'px';
+      tries++;
+    }
+  }
+  function fitAdaptiveOneLines(){
+    document.querySelectorAll('.instruction-banner .line').forEach(fitOneLine);
+    fitOneLine(document.querySelector('#lang-select .lang-title'));
+    fitOneLine(document.querySelector('#final .guideline'));
+  }
+
+  window.addEventListener('resize', () => { requestFitAll(); fitAdaptiveOneLines(); });
+
+  /* 선택 기록 */
+  const selectionMap = {};
+  let currentPair = ['ko','en'];
+  let personMode = 'self'; // 'self' | 'other'
+
+  function getKoTextFromCell(cell){
+    const ko = cell.querySelector('.lang-line.ko');
+    return ko ? ko.textContent.trim() : '';
+  }
+  function getPairTextFromCell(cell){
+    const out = [];
+    currentPair.forEach(code=>{
+      const s = cell.querySelector('.lang-line.'+code);
+      if (s) out.push(s.textContent.trim());
+    });
+    return out.join(' / ');
+  }
+
+  function updateFinalSummary(){
+    const parts = [];
+    [1,2,3].forEach(i=>{
+      const v = selectionMap[i];
+      if (v) parts.push(v);
+    });
+
+    const val4 = selectionMap[4];
+    if (val4) parts.push(val4);
+
+    const sec5 = selectionMap[5];
+    const block5 = [];
+    if (sec5){
+      if (sec5.self && sec5.self.size){ sec5.self.forEach(label => block5.push(`본인(${label})`)); }
+      if (sec5.other && sec5.other.size){ sec5.other.forEach(label => block5.push(`그사람(${label})`)); }
+    }
+    if (block5.length) parts.push(block5.join(' '));
+
+    const box = document.getElementById('final-summary');
+    if (box) box.value = parts.filter(Boolean).join(' + ');
+  }
+
+  document.addEventListener('click', (e)=>{
+    const cell = e.target.closest('.box-cell');
+    if(!cell) return;
+    const row = cell.parentElement;
+    if(!row || !row.classList.contains('box-row')) return;
+    const sectionEl = cell.closest('.multi-lang');
+    const section = sectionEl ? sectionEl.getAttribute('data-section') : null;
+    if (!section || section === '2') return;
+
+    if (section === '6'){
+      row.querySelectorAll('.box-cell').forEach(c => c.classList.remove('selected'));
+      cell.classList.add('selected');
+      return;
+    }
+
+    if (section === '4'){
+      sectionEl.querySelectorAll('.box-cell.selected').forEach(c => c.classList.remove('selected'));
+      cell.classList.add('selected');
+      selectionMap[4] = getKoTextFromCell(cell);
+      updateFinalSummary();
+      return;
+    }
+
+    if (section === '5'){
+      cell.classList.toggle('selected');
+      const label = getKoTextFromCell(cell);
+      if (!selectionMap[5]) selectionMap[5] = { self: new Set(), other: new Set() };
+      const targetSet = personMode === 'self' ? selectionMap[5].self : selectionMap[5].other;
+      if (cell.classList.contains('selected')) targetSet.add(label);
+      else targetSet.delete(label);
+      updateFinalSummary();
+      return;
+    }
+
+    row.querySelectorAll('.box-cell').forEach(c => c.classList.remove('selected'));
+    cell.classList.add('selected');
+    selectionMap[section] = getKoTextFromCell(cell);
+    updateFinalSummary();
+  });
+
+  const addrPH = {
+    en: '장소 / Address', zh: '장소 / 地址', vi: '장소 / Địa chỉ', uz: '장소 / Manzil',
+    ne: '장소 / ठेगाना', th: '장소 / ที่อยู่',
+    km: '장소 / អាសយដ្ឋាន', fil: '장소 / Tirahan/Address', si: 'ස්ථානය / ලිපිනය', id: 'Tempat / Alamat'
+  };
+  const otherPH = {
+    en: '예: 길 안내, 상사의 폭언 • 폭행 • 괴롭힘, 임금체불\nex: directions, boss’s verbal • physical abuse • harassment, unpaid wages',
+    zh: '예: 길 안내, 상사의 폭언 • 폭행 • 괴롭힘, 임금체불\n例如：问路、上司的辱骂 • 殴打 • 骚扰、拖欠工资',
+    vi: '예: 길 안내, 상사의 폭언 • 폭행 • 괴롭힘, 임금체불\nvd: chỉ đường, bị cấp trên chửi mắng • đánh đập • quấy rối, nợ lương',
+    uz: '예: 길 안내, 상사의 폭언 • 폭행 • 괴롭힘, 임금체불\nmasalan: yo‘l ko‘rsatish, rahbarning haqorati • jismoniy zo‘ravonligi • taʼqibi, ish haqi toʻlanmasligi',
+    ne: '예: 길 안내, 상사의 폭언 • 폭행 • 괴롭힘, 임금체불\nउदाहरण: बाटो निर्देशन, अधिकारीको गाली • कुटपिट • उत्पीडन, तलब बक्यौता',
+    th: '예: 길 안내, 상사의 폭언 • 폭행 • 괴롭힘, 임금체불\nเช่น: ขอเส้นทาง, การด่าทอ • ทำร้าย • คุกคามโดยหัวหน้า, ค่าจ้างค้างจ่าย',
+    km: '예: 길 안내, 상사의 폭언 • 폭행 • 괴롭힘, 임금체불\nឧ. បង្ហាញផ្លូវ, ការរិះគន់/វាយប្រហារ/គំរាមពីអ្នកគ្រប់គ្រង, ប្រាក់ខែខកខាន',
+    fil:'예: 길 안내, 상사의 폭언 • 폭행 • 괴롭힘, 임금체불\nhal: direksyon, pagmumura • pananakit • pang-hahasa ng boss, hindi nabayarang sahod',
+    si: '예: 길 안내, 상사의 폭언 • 폭행 • 괴롭힘, 임금체불\nඋදා: මාර්ගය, සේ bossගේ අපහාස • පහර • බියගන්වීම, වැටුප් නොලැබීම',
+    id: '예: 길 안내, 상사의 폭언 • 폭행 • 괴롭힘, 임금체불\nmis: petunjuk jalan, hinaan/pemukulan/pelecehan oleh atasan, gaji belum dibayar'
+  };
+
+  const WHO_LABELS = {
+    en: { self:'Self', other:'That person' },
+    zh: { self:'自己', other:'那个人' },
+    vi: { self:'Bản thân', other:'Người đó' },
+    uz: { self:"O'zim", other:"O'sha odam" },
+    ne: { self:'आफू', other:'त्यो व्यक्ति' },
+    th: { self:'ตัวเอง', other:'คนนั้น' },
+    km: { self:'ខ្លួនឯង', other:'មនុស្សនោះ' },
+    fil:{ self:'Sarili', other:'Tao na iyon' },
+    si: { self:'මම', other:'එම පුද්ගලයා' },
+    id: { self:'Saya', other:'Orang itu' }
+  };
+
+  function setReportLangs(pair){
+    currentPair = pair;
+    const report = document.getElementById('report');
+    report.setAttribute('data-langs', pair.join(' '));
+
+    const second = pair.find(l => l !== 'ko') || 'en';
+    const addr = document.getElementById('where-address');
+    const other = document.getElementById('other-consult');
+    if (addr && addrPH[second]) addr.placeholder = addrPH[second];
+    if (other && otherPH[second]) other.placeholder = otherPH[second];
+    if (addr){ addr.setAttribute('lang', second); }
+    if (other){ other.setAttribute('lang', second); }
+
+    const who = WHO_LABELS[second] || WHO_LABELS.en;
+    const selfBtn = document.getElementById('who-self-btn');
+    const otherBtn = document.getElementById('who-other-btn');
+    if (selfBtn) selfBtn.textContent = `본인 / ${who.self}`;
+    if (otherBtn) otherBtn.textContent = `그사람 / ${who.other}`;
+
+    renderPlacePanel(second);
+    togglePlacePanel(false);
+
+    requestFitAll();
+    fitAdaptiveOneLines();
+  }
+
+  function selectLangPair(second){
+    setReportLangs(['ko', second]);
+    showScreen('report');
+  }
+
+  function setupDateTimePlaceholders(){
+    const dateEl = document.getElementById('when-date');
+    const timeEl = document.getElementById('when-time');
+
+    function enablePlaceholder(el, realType, ph){
+      if (!el) return;
+      el.setAttribute('data-real-type', realType);
+
+      if (!el.value){
+        el.type = 'text';
+        el.placeholder = ph;
+      }
+
+      el.addEventListener('focus', ()=>{
+        if (el.type === 'text'){
+          el.type = el.getAttribute('data-real-type');
+          setTimeout(()=>{ try{ el.showPicker && el.showPicker(); }catch(e){} }, 0);
+        }
+      });
+      el.addEventListener('blur', ()=>{
+        if (!el.value){ el.type = 'text'; el.placeholder = ph; }
+      });
+    }
+
+    enablePlaceholder(dateEl, 'date', '날짜 / Date');
+    enablePlaceholder(timeEl, 'time', '시간 / Time');
+  }
+
+  function formatDateTime(dateStr, timeStr){
+    let out = '';
+    if (dateStr) out = dateStr.replaceAll('-','.');
+    if (timeStr) out += (out ? ' ' : '') + timeStr;
+    return out.trim();
+  }
+  function handleWhenWhereChange(){
+    const dateStr = (document.getElementById('when-date').value || '').trim();
+    const timeStr = (document.getElementById('when-time').value || '').trim();
+    const addrStr = (document.getElementById('where-address').value || '').trim();
+
+    const dt = formatDateTime(dateStr, timeStr);
+    const parts = [];
+    if (dt) parts.push(dt);
+    if (addrStr) parts.push(addrStr);
+    selectionMap[2] = parts.join(' + ');
+    updateFinalSummary();
+  }
+
+  /* 다시 작성 버튼 */
+  function setupResetButton(){
+    const btn = document.getElementById('reset-button');
+    if (!btn) return;
+    btn.addEventListener('click', ()=>{
+      [1,2,3,4,5].forEach(k => delete selectionMap[k]);
+      const box = document.getElementById('final-summary');
+      if (box) box.value = '';
+      [1,2,3,4,5].forEach(sec=>{
+        document.querySelectorAll(`.multi-lang[data-section="${sec}"] .box-cell.selected`).forEach(el=>el.classList.remove('selected'));
+      });
+
+      const addr = document.getElementById('where-address');
+      if (addr) addr.value = '';
+
+      const dateEl = document.getElementById('when-date');
+      const timeEl = document.getElementById('when-time');
+      if (dateEl){ dateEl.value=''; dateEl.type='text'; dateEl.placeholder='날짜 / Date'; }
+      if (timeEl){ timeEl.value=''; timeEl.type='text'; timeEl.placeholder='시간 / Time'; }
+
+      setPersonMode('self');
+      handleWhenWhereChange();
+    });
+  }
+
+  /* 장소 선택 패널 */
+  const PLACE_DICT = {
+    en: {home:'Home', work:'Work', shop:'Store', street:'Street/Outdoor', other:'Other'},
+    zh: {home:'家', work:'公司', shop:'商店', street:'路上/室外', other:'其他'},
+    vi: {home:'Nhà', work:'Công ty', shop:'Cửa hàng', street:'Ngoài đường', other:'Khác'},
+    uz: {home:'Uy', work:'Ish joyi', shop:"Do'kon", street:"Ko'chada", other:'Boshqa'},
+    ne: {home:'घर', work:'कार्यालय', shop:'पसल', street:'बाटोमा', other:'अन्य'},
+    th: {home:'บ้าน', work:'ที่ทำงาน', shop:'ร้านค้า', street:'ริมถนน', other:'อื่นๆ'},
+    km: {home:'ផ្ទះ', work:'កន្លែងធ្វើការ', shop:'ហាង', street:'លើផ្លូវ/ខាងក្រៅ', other:'ផ្សេងទៀត'},
+    fil:{home:'Bahay', work:'Trabaho', shop:'Tindahan', street:'Kalsada/Labas', other:'Iba pa'},
+    si: {home:'ගෙදර', work:'වැඩ තැන', shop:'වෙළඳසැල', street:'වීථිය/බාහිර', other:'වෙනත්'},
+    id: {home:'Rumah', work:'Tempat kerja', shop:'Toko', street:'Jalan/Luar', other:'Lainnya'}
+  };
+
+  function resetIOSZoom(){
+    if (!/iP(ad|hone|od)/.test(navigator.userAgent)) return;
+    const vv = window.visualViewport;
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) return;
+    if (vv && vv.scale && vv.scale > 1){
+      const original = meta.getAttribute('content') || 'width=device-width, initial-scale=1';
+      meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1');
+      setTimeout(()=> meta.setAttribute('content', original), 250);
+    }
+  }
+
+  function insertAddress(text){
+    const input = document.getElementById('where-address');
+    if(!input) return;
+    input.value = text;
+    try { if (document.activeElement === input) input.blur(); } catch(e){}
+    setTimeout(()=> resetIOSZoom(), 30);
+    handleWhenWhereChange();
+  }
+
+  function renderPlacePanel(second){
+    const panel = document.getElementById('place-panel');
+    const cell = document.getElementById('where-cell');
+    if(!panel || !cell) return;
+
+    panel.innerHTML = '';
+    const dict = PLACE_DICT[second] || PLACE_DICT.en;
+
+    const items = [
+      {ko:'집', for: dict.home},
+      {ko:'회사', for: dict.work},
+      {ko:'상점', for: dict.shop},
+      {ko:'노상', for: dict.street},
+      {ko:'기타', for: dict.other}
+    ];
+
+    items.forEach(it=>{
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'place-option';
+      btn.textContent = `${it.ko}(${it.for})`;
+      btn.addEventListener('click', ()=>{
+        insertAddress(it.ko);
+        togglePlacePanel(false);
+      });
+      panel.appendChild(btn);
+    });
+  }
+
+  function togglePlacePanel(show){
+    const panel = document.getElementById('place-panel');
+    const cell = document.getElementById('where-cell');
+    const btn = document.getElementById('place-toggle');
+    if(!panel || !cell || !btn) return;
+
+    if (show){
+      panel.classList.remove('hidden');
+      cell.classList.add('with-panel');
+    } else {
+      panel.classList.add('hidden');
+      cell.classList.remove('with-panel');
+    }
+    btn.setAttribute('aria-expanded', show ? 'true' : 'false');
+    requestFitAll();
+  }
+
+  function setupPlaceUI(){
+    const btn = document.getElementById('place-toggle');
+    const panel = document.getElementById('place-panel');
+    const addr = document.getElementById('where-address');
+    if(!btn || !panel || !addr) return;
+
+    btn.addEventListener('click', ()=>{
+      const open = panel.classList.contains('hidden');
+      togglePlacePanel(open);
+    });
+
+    addr.addEventListener('focus', ()=> togglePlacePanel(false));
+  }
+
+  function showToast(msg){
+    const el = document.getElementById('toast');
+    if(!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=> el.classList.remove('show'), 2600);
+  }
+
+  function setupCaptureButton(){
+    const btn = document.getElementById('capture-button');
+    const ta = document.getElementById('final-summary');
+    if(!btn || !ta) return;
+
+    function wrapTextLines(ctx, text, maxWidth){
+      const words = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split(/\s+/);
+      const lines = [];
+      let line = '';
+      const space = ' ';
+      for (let i=0;i<words.length;i++){
+        const word = words[i];
+        if (word.includes('\n')){
+          const parts = word.split('\n');
+          for (let p=0;p<parts.length;p++){
+            const segment = parts[p];
+            const test = line ? line + space + segment : segment;
+            if (ctx.measureText(test).width <= maxWidth){
+              line = test;
+            } else {
+              if (line) lines.push(line);
+              if (ctx.measureText(segment).width > maxWidth){
+                let buf = '';
+                for (const ch of segment){
+                  const t2 = buf + ch;
+                  if (ctx.measureText(t2).width <= maxWidth){
+                    buf = t2;
+                  } else {
+                    if (buf) lines.push(buf);
+                    buf = ch;
+                  }
+                }
+                line = buf;
+              } else {
+                line = segment;
+              }
+            }
+            if (p < parts.length - 1){ lines.push(line); line = ''; }
+          }
+        } else {
+          const test = line ? line + space + word : word;
+          if (ctx.measureText(test).width <= maxWidth){
+            line = test;
+          } else {
+            if (line) lines.push(line);
+            if (ctx.measureText(word).width > maxWidth){
+              let buf = '';
+              for (const ch of word){
+                const t2 = buf + ch;
+                if (ctx.measureText(t2).width <= maxWidth){
+                  buf = t2;
+                } else {
+                  if (buf) lines.push(buf);
+                  buf = ch;
+                }
+              }
+              line = buf;
+            } else {
+              line = word;
+            }
+          }
+        }
+      }
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    function openImageInNewTab(canvas){
+      canvas.toBlob((blob)=>{
+        if(!blob){ showToast('이미지 생성 실패'); return; }
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        showToast('이미지를 새창으로 열었습니다. 저장/공유를 선택하세요.');
+        setTimeout(()=> URL.revokeObjectURL(url), 60000);
+      }, 'image/png');
+    }
+
+    btn.addEventListener('click', ()=>{
+      const text = (ta.value || '').trim() || '(내용 없음)';
+      const comp = getComputedStyle(ta);
+      const fontSize = parseFloat(comp.fontSize) || 16;
+      const fontFamily = comp.fontFamily || 'Arial, sans-serif';
+      const fontWeight = comp.fontWeight || '400';
+      const lineHeight = Math.max(fontSize * 1.4, fontSize + 6);
+      const padding = 16;
+      const maxWidthCSS = ta.clientWidth;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const drawWidth = maxWidthCSS - padding * 2;
+
+      const meas = document.createElement('canvas').getContext('2d');
+      meas.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+      const lines = wrapTextLines(meas, text, drawWidth);
+
+      const canvas = document.createElement('canvas');
+      const width = maxWidthCSS;
+      const heightCSS = Math.round(padding * 2 + lines.length * lineHeight);
+      canvas.width = Math.max(1, Math.floor(width * dpr));
+      canvas.height = Math.max(1, Math.floor(heightCSS * dpr));
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, width, heightCSS);
+      ctx.fillStyle = '#000000';
+      ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+      ctx.textBaseline = 'top';
+      let y = padding;
+      lines.forEach(line=>{ ctx.fillText(line, padding, y); y += lineHeight; });
+      openImageInNewTab(canvas);
+    });
+  }
+
+  function setPersonMode(mode){
+    personMode = (mode === 'other') ? 'other' : 'self';
+    const selfBtn = document.getElementById('who-self-btn');
+    const otherBtn = document.getElementById('who-other-btn');
+    if (selfBtn && otherBtn){
+      if (personMode === 'self'){
+        selfBtn.classList.add('selected'); selfBtn.setAttribute('aria-pressed','true');
+        otherBtn.classList.remove('selected'); otherBtn.setAttribute('aria-pressed','false');
+      } else {
+        otherBtn.classList.add('selected'); otherBtn.setAttribute('aria-pressed','true');
+        selfBtn.classList.remove('selected'); selfBtn.setAttribute('aria-pressed','false');
+      }
+    }
+    document.querySelectorAll('.multi-lang[data-section="5"] .box-cell.selected').forEach(el => el.classList.remove('selected'));
+  }
+
+  function setupWhoToggles(){
+    const selfBtn = document.getElementById('who-self-btn');
+    const otherBtn = document.getElementById('who-other-btn');
+    if (selfBtn) selfBtn.addEventListener('click', ()=> setPersonMode('self'));
+    if (otherBtn) otherBtn.addEventListener('click', ()=> setPersonMode('other'));
+    setPersonMode('self');
+  }
+
+  /* 초기화 */
+  window.addEventListener('load', ()=>{
+    setReportLangs(['ko','en']);
+    setupDateTimePlaceholders();
+    handleWhenWhereChange();
+    setupResetButton();
+    setupPlaceUI();
+    setupCaptureButton();
+    setupWhoToggles();
+    requestFitAll();
+    fitAdaptiveOneLines();
+
+    ['when-date','when-time','where-address'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el){
+        el.addEventListener('change', handleWhenWhereChange);
+        el.addEventListener('input', handleWhenWhereChange);
+      }
+    });
+  });
+</script>
+</body>
+</html>
